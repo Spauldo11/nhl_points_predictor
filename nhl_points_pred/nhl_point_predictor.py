@@ -88,7 +88,7 @@ def load_and_preprocess_data(csv_filepath):
     df = df.dropna(subset=['Next_Season_PTS'])
     
     # Define features
-    exclude_cols = ['Player', 'Team', 'Season', 'Next_Season_PTS', 'Awards', 'xG', 'CF%', 'FF%']
+    exclude_cols = ['Player', 'Team', 'Season', 'Next_Season_PTS', 'Awards', 'xG', 'CF%', 'FF%', "+/-"]
     feature_cols = [col for col in df.columns if col not in exclude_cols]
     
     df = df.dropna(subset=feature_cols)
@@ -154,7 +154,8 @@ if __name__ == "__main__":
         history = nhl_model.fit(
             X_train, y_train,
             validation_split=0.15,
-            epochs=100,
+            # Epochs set to 500 for training recent models
+            epochs=500,
             batch_size=32,
             verbose=1
         )
