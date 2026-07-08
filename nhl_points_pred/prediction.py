@@ -4,6 +4,13 @@ import tensorflow as tf
 from tensorflow import keras
 import pickle
 
+# Add colors for easier terminal legibility
+RED = "\033[31m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
+BLUE = "\033[34m"
+RESET = "\033[0m"
+
 def time_to_seconds(time_str):
     """Converts a 'MM:SS' time string into a float of total seconds."""
     if pd.isna(time_str) or not isinstance(time_str, str):
@@ -19,7 +26,7 @@ def time_to_seconds(time_str):
         return 0.0
 
 def predict_player_from_csv(player_name, season, csv_filepath="nhl_historical_stats.csv", 
-                            model_path="nhl_point_predictor.keras", scaler_path="scaler.pkl"):
+                            model_path="nhl_point_predictor.keras", model_path2="nhl_point_predictorv2.keras", model_path3="nhl_points_predictorv3.keras", scaler_path="scaler.pkl"):
     """
     Loads the master CSV, replicates the training preprocessing pipeline,
     extracts the target player's row, and predicts next season's points.
@@ -42,11 +49,7 @@ def predict_player_from_csv(player_name, season, csv_filepath="nhl_historical_st
         df = pd.get_dummies(df, columns=['Pos'], dtype=int)
 
     # 3. Isolate the exact feature columns expected by the model
-    # (Ensure this list matches your training script perfectly!)
-    exclude_cols = ['Player', 'Team', 'Season', 'Next_Season_PTS', 'Awards', 'xG', 'CF%', 'FF%'] 
-    # If you chose to drop position instead of encoding it, uncomment the line below:
-    # exclude_cols.append('Pos') 
-    
+    exclude_cols = ['Player', 'Team', 'Season', 'Next_Season_PTS', 'Awards', 'xG', 'CF%', 'FF%', "+\-"] 
     feature_cols = [col for col in df.columns if col not in exclude_cols]
     
     # Force all feature columns to be numeric types just like in training
@@ -92,28 +95,41 @@ def predict_player_from_csv(player_name, season, csv_filepath="nhl_historical_st
         with open(scaler_path, "rb") as f:
             scaler = pickle.load(f)
         model = keras.models.load_model(model_path)
+        model2 = keras.models.load_model(model_path2)
+        model3 = keras.models.load_model(model_path3)
     except FileNotFoundError as e:
         return f"Error loading model or scaler files: {e}"
 
     # Scale and pass to the Keras model
     scaled_stats = scaler.transform(stats_array)
     prediction = model.predict(scaled_stats, verbose=0)
+    alt_prediction = model2.predict(scaled_stats, verbose=0)
+    alt_prediction2 = model3.predict(scaled_stats, verbose=0)
+
     
     # Return predicted value (clamped to 0 minimum)
-    return max(0.0, prediction[0][0])
+    return (max(0.0, prediction[0][0]), alt_prediction[0][0], alt_prediction2[0][0], stats_array)
 
 if __name__ == "__main__":
-    target_player = input("Enter a player name you would like to predict the points for (ensure proper spelling and capitalization): ")
+    target_player = input(f"Enter a player name you would like to predict the points for (ensure proper spelling and capitalization): {RED}")
     # Change base_season for testing
     # Use 2026 for actual next-year predictions
-    base_season = 2026 
+    base_season = 2025 
+
+    prediction = predict_player_from_csv(target_player, base_season)
     
-    print(f"Running inference for {target_player} using {base_season} metrics...")
-    result = predict_player_from_csv(target_player, base_season)
+    print(f"{RESET}Running inference for {RED}{target_player}{RESET} using {YELLOW}{base_season}{RESET} metrics...")
+    result1 = prediction[0]
+    result2 = prediction[1]
+    result3 = prediction[2]
+
+    print(f"Stats used for prediction: {prediction[3]}")
     
-    if isinstance(result, str):
-        print(result)
+    if isinstance(result1, str):
+        print(result1)
     else:
         print("\n" + "="*50)
-        print(f"Projected Points for {base_season}-{base_season+1} Season: {result:.1f}")
+        print(f"Projected Points for {YELLOW}{base_season}-{base_season+1}{RESET} Season (100 Epochs): {result1:.1f}")
+        print(f"Projected Points for {YELLOW}{base_season}-{base_season+1}{RESET} Season (500 Epochs): {result2:.1f}")
+        print(f"Projected Points for {YELLOW}{base_season}-{base_season+1}{RESET} Season (500 Epochs | No +/-): {result3:.1f}")
         print("="*50)
