@@ -1,0 +1,5 @@
+.nhl_venv/
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/

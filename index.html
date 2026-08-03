@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NHL Points Projections | Neural Inference Engine</title>
+  <meta name="description" content="Professional deep learning player points projections powered by Keras neural network ensembles and historical telemetry.">
+  
+  <!-- Google Fonts: Outfit (Display), Inter (Body), JetBrains Mono (Telemetry/Data) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Chart.js for quantitative analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Design System Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Root App Shell -->
+  <div class="app-shell">
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-symbol">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div class="brand-identity">
+          <h1>NHL POINTS <span class="brand-highlight">INFERENCE</span></h1>
+          <span class="brand-subtitle">Dense Neural Network Telemetry Engine</span>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="status-badge">
+          <span class="status-indicator-dot"></span>
+          <span class="status-label">SYS_ONLINE // 4 MODELS LOADED</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-content">
+      
+      <!-- Section 1: Asymmetrical Search & Parameter Hero Control Deck -->
+      <section class="query-hero-section">
+        <div class="query-panel-main">
+          <div class="panel-tagline">
+            <h2>PLAYER INFERENCE QUERY</h2>
+            <p>Compute multi-model point projections using historical regular season data.</p>
+          </div>
+
+          <form id="prediction-form" class="query-form" autocomplete="off" onsubmit="event.preventDefault();">
+            <div class="input-field-group">
+              <label for="player-input" class="field-label">
+                <i class="fa-solid fa-magnifying-glass"></i> Target Player Name
+              </label>
+              <div class="textbox-wrapper">
+                <input 
+                  type="text" 
+                  id="player-input" 
+                  class="query-textbox" 
+                  placeholder="Enter player name (e.g. Connor McDavid)..."
+                  value="Connor McDavid"
+                  required
+                />
+                <button type="button" id="clear-search-btn" class="clear-input-btn" title="Clear input" style="display: none;">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+                <!-- Autocomplete Dropdown List -->
+                <div id="autocomplete-list" class="autocomplete-dropdown hidden"></div>
+              </div>
+            </div>
+
+            <div class="quick-stars-wrapper">
+              <span class="quick-label">QUICK BENCHMARK PLAYERS:</span>
+              <div class="chip-group">
+                <button type="button" class="chip-btn" data-name="Connor McDavid">Connor McDavid</button>
+                <button type="button" class="chip-btn" data-name="Nathan MacKinnon">Nathan MacKinnon</button>
+                <button type="button" class="chip-btn" data-name="Auston Matthews">Auston Matthews</button>
+                <button type="button" class="chip-btn" data-name="Nikita Kucherov">Nikita Kucherov</button>
+                <button type="button" class="chip-btn" data-name="Cale Makar">Cale Makar</button>
+                <button type="button" class="chip-btn" data-name="Artemi Panarin">Artemi Panarin</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right Side Control Parameters Panel (Asymmetrical balance) -->
+        <aside class="query-panel-side">
+          <div class="side-panel-header">
+            <h3>PIPELINE PARAMETERS</h3>
+          </div>
+          
+          <div class="param-control">
+            <label for="season-select" class="field-label">
+              <i class="fa-solid fa-calendar-days"></i> Base Season Baseline
+            </label>
+            <div class="select-box">
+              <select id="season-select" class="query-select">
+                <option value="2026" selected>2026 (Next Season Projection)</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+              </select>
+              <i class="fa-solid fa-chevron-down select-arrow"></i>
+            </div>
+          </div>
+
+          <button type="submit" form="prediction-form" id="predict-btn" class="btn-execute">
+            <span class="btn-text"><i class="fa-solid fa-play"></i> EXECUTE INFERENCE</span>
+            <span class="btn-spinner hidden"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+          </button>
+        </aside>
+      </section>
+
+      <!-- Alert / Error Notification Banner -->
+      <div id="alert-banner" class="alert-banner hidden">
+        <div class="alert-body">
+          <i class="fa-solid fa-triangle-exclamation alert-symbol"></i>
+          <span id="alert-message">System notification message</span>
+        </div>
+        <button type="button" id="close-alert-btn" class="alert-dismiss-btn" title="Dismiss">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Results Display Section -->
+      <div id="results-wrapper" class="results-container hidden">
+        
+        <!-- Player Telemetry Header Bar -->
+        <article class="player-header-card">
+          <div class="player-profile-left">
+            <div class="player-badge-hex">
+              <span id="player-pos-badge" class="pos-tag">C</span>
+            </div>
+            <div class="player-identity-info">
+              <h2 id="display-player-name">Connor McDavid</h2>
+              <div class="telemetry-pill-row">
+                <span id="display-team-name" class="telemetry-pill"><i class="fa-solid fa-shield-halved"></i> EDM</span>
+                <span id="display-season-used" class="telemetry-pill"><i class="fa-solid fa-database"></i> 2026 DATA</span>
+                <span id="display-age" class="telemetry-pill"><i class="fa-solid fa-user"></i> AGE --</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Asymmetrical Split 1: Primary Projection (55%) vs Neural Ensemble Bench (45%) -->
+        <section class="projection-grid">
+          
+          <!-- Primary Projection Hero Metric Card -->
+          <article class="hero-prediction-card">
+            <div class="hero-card-topbar">
+              <span class="section-micro-label">PRIMARY PROJECTION</span>
+              <span id="model-badge" class="model-tag">Model v1 (100 Epochs)</span>
+            </div>
+
+            <div class="hero-metric-readout">
+              <div class="metric-number-group">
+                <span id="primary-pts-val" class="pts-value">0.0</span>
+                <span class="pts-unit">PTS</span>
+              </div>
+              <p id="hero-pts-subtitle" class="pts-annotation">Projected Regular Season Total Points</p>
+            </div>
+
+            <div class="hero-card-telemetry">
+              <div class="telemetry-stat-item">
+                <span class="stat-sublabel">HISTORICAL PTS</span>
+                <span id="actual-pts-val" class="stat-subval">--</span>
+              </div>
+              <div class="telemetry-stat-item">
+                <span class="stat-sublabel">GAMES PLAYED</span>
+                <span id="actual-gp-val" class="stat-subval">--</span>
+              </div>
+              <div class="telemetry-stat-item">
+                <span class="stat-sublabel">POINTS / GAME</span>
+                <span id="actual-ppg-val" class="stat-subval">--</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Neural Network Bench Comparison -->
+          <aside class="variants-card">
+            <div class="variants-card-header">
+              <h3>NEURAL ARCHITECTURE BENCH</h3>
+              <span class="variants-sub-note">Select model variant to switch primary readout</span>
+            </div>
+
+            <div class="variants-list">
+              <button type="button" class="variant-item active" data-model="m1">
+                <div class="variant-meta">
+                  <div class="variant-title-row">
+                    <span class="variant-code">MODEL_V1</span>
+                    <span class="variant-chip">100 EPOCHS</span>
+                  </div>
+                  <span class="variant-desc">Dense Baseline Architecture</span>
+                </div>
+                <div id="m1-val" class="variant-readout">--</div>
+              </button>
+
+              <button type="button" class="variant-item" data-model="m2">
+                <div class="variant-meta">
+                  <div class="variant-title-row">
+                    <span class="variant-code">MODEL_V2</span>
+                    <span class="variant-chip">500 EPOCHS</span>
+                  </div>
+                  <span class="variant-desc">Extended Deep Convergence</span>
+                </div>
+                <div id="m2-val" class="variant-readout">--</div>
+              </button>
+
+              <button type="button" class="variant-item" data-model="m3">
+                <div class="variant-meta">
+                  <div class="variant-title-row">
+                    <span class="variant-code">MODEL_V3</span>
+                    <span class="variant-chip">NO +/- MATRIX</span>
+                  </div>
+                  <span class="variant-desc">Isolated Offensive Metrics</span>
+                </div>
+                <div id="m3-val" class="variant-readout">--</div>
+              </button>
+
+              <button type="button" class="variant-item" data-model="m4">
+                <div class="variant-meta">
+                  <div class="variant-title-row">
+                    <span class="variant-code">MODEL_V4</span>
+                    <span class="variant-chip">SCALED +/-</span>
+                  </div>
+                  <span class="variant-desc">Non-Linear Penalty Scaled</span>
+                </div>
+                <div id="m4-val" class="variant-readout">--</div>
+              </button>
+
+              <button type="button" class="variant-item variant-consensus" data-model="avg">
+                <div class="variant-meta">
+                  <div class="variant-title-row">
+                    <span class="variant-code">ENSEMBLE_AVG</span>
+                    <span class="variant-chip chip-consensus">CONSENSUS</span>
+                  </div>
+                  <span class="variant-desc">Weighted Mean Across 4 Networks</span>
+                </div>
+                <div id="mavg-val" class="variant-readout readout-consensus">--</div>
+              </button>
+            </div>
+          </aside>
+        </section>
+
+        <!-- Asymmetrical Split 2: High-Density Input Metrics (45%) vs Radar Analytics Chart (55%) -->
+        <section class="analytics-grid">
+          
+          <!-- Key Input Metrics Matrix (High Density Compact Terminal) -->
+          <article class="key-stats-card">
+            <div class="card-section-header">
+              <h3>INPUT FEATURE METRICS MATRIX</h3>
+              <span class="header-badge">BASE STATS</span>
+            </div>
+            <div class="stats-matrix-grid">
+              <div class="matrix-tile">
+                <span class="tile-key">GOALS (G)</span>
+                <span id="stat-g" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">ASSISTS (A)</span>
+                <span id="stat-a" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">SHOTS (SOG)</span>
+                <span id="stat-sog" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">POWERPLAY (PPG)</span>
+                <span id="stat-ppg" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">TIME ON ICE</span>
+                <span id="stat-toi" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">AVG TOI (ATOI)</span>
+                <span id="stat-atoi" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">PLUS/MINUS (+/-)</span>
+                <span id="stat-plusminus" class="tile-value">--</span>
+              </div>
+              <div class="matrix-tile">
+                <span class="tile-key">PENALTY MIN (PIM)</span>
+                <span id="stat-pim" class="tile-value">--</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Stat Radar Analytics Chart Container -->
+          <article class="chart-card">
+            <div class="card-section-header">
+              <h3>PERFORMANCE INDEX PROFILE</h3>
+              <span class="header-badge">RADAR TENSOR</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="stat-radar-chart"></canvas>
+            </div>
+          </article>
+        </section>
+
+        <!-- Section 5: Scaled Feature Tensor Details Table -->
+        <section class="table-section-card">
+          <div class="table-card-top">
+            <div class="table-title-block">
+              <h3>SCALED FEATURE TENSOR DETAILS</h3>
+              <p>Numerical inputs passed directly into Keras <code>Dense Neural Networks</code></p>
+            </div>
+            <div class="table-filter-group">
+              <i class="fa-solid fa-filter filter-icon"></i>
+              <input type="text" id="table-search-input" class="table-filter-input" placeholder="Filter tensor feature keys...">
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="features-table">
+              <thead>
+                <tr>
+                  <th>FEATURE KEY</th>
+                  <th>NORMALIZED VALUE</th>
+                  <th>TENSOR CLASSIFICATION</th>
+                </tr>
+              </thead>
+              <tbody id="features-table-body">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div> <!-- /#results-wrapper -->
+    </main>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <span class="footer-brand"><i class="fa-solid fa-hockey-puck"></i> NHL POINTS INFERENCE ENGINE</span>
+        <span class="footer-meta">TensorFlow / Keras Dense Neural Networks &bull; Tokenized Custom Architecture</span>
+      </div>
+    </footer>
+
+  </div> <!-- /.app-shell -->
+
+  <!-- Client JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
