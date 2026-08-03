@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NHL Points Projections | Neural Inference Engine</title>
-  <meta name="description" content="Professional deep learning player points projections powered by Keras neural network ensembles and historical telemetry.">
-  
+  <meta name="description"
+    content="Professional deep learning player points projections powered by Keras neural network ensembles and historical telemetry.">
+
   <!-- Google Fonts: Outfit (Display), Inter (Body), JetBrains Mono (Telemetry/Data) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!--favicon-->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -20,6 +27,7 @@
   <!-- Custom Design System Stylesheet -->
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
 
   <!-- Root App Shell -->
@@ -32,21 +40,15 @@
           <i class="fa-solid fa-layer-group"></i>
         </div>
         <div class="brand-identity">
-          <h1>NHL POINTS <span class="brand-highlight">INFERENCE</span></h1>
+          <h1>NHL POINTS <span class="brand-highlight">PREDICTOR</span></h1>
           <span class="brand-subtitle">Dense Neural Network Telemetry Engine</span>
-        </div>
-      </div>
-      <div class="header-status">
-        <div class="status-badge">
-          <span class="status-indicator-dot"></span>
-          <span class="status-label">SYS_ONLINE // 4 MODELS LOADED</span>
         </div>
       </div>
     </header>
 
     <!-- Main Content Container -->
     <main class="main-content">
-      
+
       <!-- Section 1: Asymmetrical Search & Parameter Hero Control Deck -->
       <section class="query-hero-section">
         <div class="query-panel-main">
@@ -61,15 +63,10 @@
                 <i class="fa-solid fa-magnifying-glass"></i> Target Player Name
               </label>
               <div class="textbox-wrapper">
-                <input 
-                  type="text" 
-                  id="player-input" 
-                  class="query-textbox" 
-                  placeholder="Enter player name (e.g. Connor McDavid)..."
-                  value="Connor McDavid"
-                  required
-                />
-                <button type="button" id="clear-search-btn" class="clear-input-btn" title="Clear input" style="display: none;">
+                <input type="text" id="player-input" class="query-textbox"
+                  placeholder="Enter player name (e.g. Connor McDavid)..." value="Connor McDavid" required />
+                <button type="button" id="clear-search-btn" class="clear-input-btn" title="Clear input"
+                  style="display: none;">
                   <i class="fa-solid fa-xmark"></i>
                 </button>
                 <!-- Autocomplete Dropdown List -->
@@ -96,7 +93,7 @@
           <div class="side-panel-header">
             <h3>PIPELINE PARAMETERS</h3>
           </div>
-          
+
           <div class="param-control">
             <label for="season-select" class="field-label">
               <i class="fa-solid fa-calendar-days"></i> Base Season Baseline
@@ -134,7 +131,7 @@
 
       <!-- Results Display Section -->
       <div id="results-wrapper" class="results-container hidden">
-        
+
         <!-- Player Telemetry Header Bar -->
         <article class="player-header-card">
           <div class="player-profile-left">
@@ -145,7 +142,8 @@
               <h2 id="display-player-name">Connor McDavid</h2>
               <div class="telemetry-pill-row">
                 <span id="display-team-name" class="telemetry-pill"><i class="fa-solid fa-shield-halved"></i> EDM</span>
-                <span id="display-season-used" class="telemetry-pill"><i class="fa-solid fa-database"></i> 2026 DATA</span>
+                <span id="display-season-used" class="telemetry-pill"><i class="fa-solid fa-database"></i> 2026
+                  DATA</span>
                 <span id="display-age" class="telemetry-pill"><i class="fa-solid fa-user"></i> AGE --</span>
               </div>
             </div>
@@ -154,7 +152,7 @@
 
         <!-- Asymmetrical Split 1: Primary Projection (55%) vs Neural Ensemble Bench (45%) -->
         <section class="projection-grid">
-          
+
           <!-- Primary Projection Hero Metric Card -->
           <article class="hero-prediction-card">
             <div class="hero-card-topbar">
@@ -254,7 +252,7 @@
 
         <!-- Asymmetrical Split 2: High-Density Input Metrics (45%) vs Radar Analytics Chart (55%) -->
         <section class="analytics-grid">
-          
+
           <!-- Key Input Metrics Matrix (High Density Compact Terminal) -->
           <article class="key-stats-card">
             <div class="card-section-header">
@@ -310,7 +308,7 @@
         </section>
 
         <!-- Section 5: Scaled Feature Tensor Details Table -->
-        <section class="table-section-card">
+        <section class="table-section-card" style="visibility:hidden">
           <div class="table-card-top">
             <div class="table-title-block">
               <h3>SCALED FEATURE TENSOR DETAILS</h3>
@@ -318,7 +316,8 @@
             </div>
             <div class="table-filter-group">
               <i class="fa-solid fa-filter filter-icon"></i>
-              <input type="text" id="table-search-input" class="table-filter-input" placeholder="Filter tensor feature keys...">
+              <input type="text" id="table-search-input" class="table-filter-input"
+                placeholder="Filter tensor feature keys...">
             </div>
           </div>
 
@@ -354,4 +353,5 @@
   <!-- Client JavaScript -->
   <script src="app.js"></script>
 </body>
+
 </html>

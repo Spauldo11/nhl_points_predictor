@@ -59,9 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const statPlusminus = document.getElementById('stat-plusminus');
   const statPim = document.getElementById('stat-pim');
 
-  // Table Elements
-  const featuresTableBody = document.getElementById('features-table-body');
-  const tableSearchInput = document.getElementById('table-search-input');
 
   // Global State
   let radarChartInstance = null;
@@ -171,15 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // Table filter search
-    tableSearchInput.addEventListener('input', (e) => {
-      const query = e.target.value.toLowerCase();
-      const rows = featuresTableBody.querySelectorAll('tr');
-      rows.forEach(row => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(query) ? '' : 'none';
-      });
-    });
   }
 
   // Fetch Available Seasons from API
@@ -337,8 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
     statPlusminus.textContent = raw['+/-'] !== undefined ? raw['+/-'] : '--';
     statPim.textContent = raw.PIM !== undefined ? raw.PIM : '--';
 
-    // Render Feature Tensor Table
-    renderFeatureTable(features, data.imputed_features || []);
 
     // Render Radar Analytics Chart
     renderRadarChart(raw);
@@ -364,25 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Feature Tensor Table Renderer
-  function renderFeatureTable(features, imputedList) {
-    featuresTableBody.innerHTML = '';
-    const entries = Object.entries(features);
-
-    entries.forEach(([key, val]) => {
-      const isImputed = imputedList.includes(key);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-text-primary);">
-          ${escapeHtml(key)}
-          ${isImputed ? '<span class="imputed-flag">(Imputed)</span>' : ''}
-        </td>
-        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-accent-cyan);">${val}</td>
-        <td style="font-family: var(--font-mono); font-size: 0.78rem; color: var(--color-text-muted);">TENSOR_SCALED_NUMERICAL</td>
-      `;
-      featuresTableBody.appendChild(tr);
-    });
-  }
 
   // Chart.js Performance Profile Radar Chart
   function renderRadarChart(raw) {
