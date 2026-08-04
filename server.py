@@ -6,27 +6,17 @@ import urllib.parse
 import pandas as pd
 import numpy as np
 
-# Ensure TensorFlow / Keras suppresses excessive logging
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-try:
-    import tensorflow as tf
-    from tensorflow import keras
-    HAS_TF = True
-except ImportError:
-    HAS_TF = False
-    print("Warning: TensorFlow/Keras not found in runtime.")
-
 # Setup paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CSV_FILEPATH = os.path.join(BASE_DIR, "nhl_historical_stats.csv")
 SCALER_PATH = os.path.join(BASE_DIR, "scaler.pkl")
 
+# NumPy weight files exported from Keras models via convert_to_tflite.py
 MODEL_PATHS = {
-    "m1": os.path.join(BASE_DIR, "nhl_point_predictor.keras"),
-    "m2": os.path.join(BASE_DIR, "nhl_point_predictorv2.keras"),
-    "m3": os.path.join(BASE_DIR, "nhl_points_predictorv3.keras"),
-    "m4": os.path.join(BASE_DIR, "nhl_points_predictorv4.keras"),
+    "m1": os.path.join(BASE_DIR, "nhl_point_predictor.npz"),
+    "m2": os.path.join(BASE_DIR, "nhl_point_predictorv2.npz"),
+    "m3": os.path.join(BASE_DIR, "nhl_points_predictorv3.npz"),
+    "m4": os.path.join(BASE_DIR, "nhl_points_predictorv4.npz"),
 }
 
 # Global loaded artifacts
@@ -104,18 +94,17 @@ def load_artifacts():
     else:
         print(f"Warning: {SCALER_PATH} not found.")
 
-    # Load Keras models
-    print("Loading Keras models...")
-    if HAS_TF:
-        for key, path in MODEL_PATHS.items():
-            if os.path.exists(path):
-                try:
-                    MODELS[key] = keras.models.load_model(path)
-                    print(f"Loaded model {key} from {os.path.basename(path)}")
-                except Exception as e:
-                    print(f"Error loading model {key}: {e}")
-            else:
-                print(f"Model file missing: {path}")
+    # Load NumPy weight files
+    print("Loading model weights...")
+    for key, path in MODEL_PATHS.items():
+        if os.path.exists(path):
+            try:
+                MODELS[key] = dict(np.load(path))
+                print(f"Loaded model {key} from {os.path.basename(path)}")
+            except Exception as e:
+                print(f"Error loading model {key}: {e}")
+        else:
+            print(f"Model file missing: {path}")
 
     print("Artifact loading complete.\n")
     return True
@@ -204,9 +193,16 @@ def run_prediction(player_name, season=2026):
     valid_pts = []
     valid_raw = []
 
-    for key, model in MODELS.items():
+    for key, weights in MODELS.items():
         try:
-            pred_val = float(model.predict(scaled_stats, verbose=0)[0][0])
+            # Pure NumPy forward pass: Dense(64,relu) -> Dense(32,relu) -> Dense(1,linear)
+            x = scaled_stats.astype(np.float32)
+            num_layers = len([k for k in weights if k.startswith('w')])
+            for i in range(num_layers):
+                x = x @ weights[f'w{i}'] + weights[f'b{i}']
+                if i < num_layers - 1:  # ReLU on all but final layer
+                    x = np.maximum(x, 0)
+            pred_val = float(x[0][0])
             pred_clamped = max(0.0, pred_val)
             predictions[key] = {
                 "label": model_labels.get(key, key),
